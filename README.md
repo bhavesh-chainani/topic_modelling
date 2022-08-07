@@ -49,14 +49,14 @@ python scripts/topic_modelling.py <lang> (change <lang> parameter to language of
 # eg. python scripts/topic_modelling.py "en" 
 ```
 
-The code will generate 3 files, which will be stored in the output/<lang> folders respectively for each language. 
-1. topic_modelling_output_<lang>.xlsx
+The code will generate 3 files, which will be stored in the output/[lang] folders respectively for each language. 
+1. topic_modelling_output_[lang].xlsx
 This file will showcase the dominant topics for content with regards to that particular actor, as well as relevant topic keywords.
 
-2. coherence_scrore_<lang>.png
+2. coherence_score_[lang].png
 This file will showcase an example of hyperparameter tuning done, to identify the number of topics to use so as to maximise the coherence score.
 
-3. lda_<lang>.html
+3. lda_[lang].html
 This file is an interactive visualisation plot for the user to see how many topics are used for each language and which are the most salient terms for each topic.
 
 # **Explanation of Code (Automatic Document Clustering)**
@@ -121,7 +121,7 @@ In the field of NLP, text preprocessing is the process of cleaning and preparing
 
 I will be using 3 of spacy's pre-trained models for each language. The model, which I will call 'nlp', can be thought of as a pipeline. When you call 'nlp' on a text or word, the text runs through a processing pipeline, which is depicted below. It means that if the text is not tokenized, it will then be tokenized, and afterwards, different components (tagger, parser, ner etc.) will be activated. To tokenize text means turning a string or document into smaller chunks (tokens). 
 
-As we are doing topic analysis on 3 seperate languages, I will run the relevant *spaCy* medium models for the three languages, English (en), Italian (it) and Russian (ru).
+As we are doing topic analysis on 3 separate languages, I will run the relevant *spaCy* medium models for the three languages, English (en), Italian (it) and Russian (ru).
 
 ![SpaCy Pipeline](files/documentation//spacy.png)
 
@@ -130,9 +130,9 @@ The most interesting component in the pipeline is the tagger which assigns Part-
 In this example, I will focus on filtering the data for those rows in "en", and will preprocess the text after that. 
 
 ```python
-lang_interested = lang ##lang is specified in the parameter <lang> when we run the script
-map_models = {"en": spacy.load("en_core_web_md"), "it": spacy.load("it_core_news_md"), "ru": spacy.load("ru_core_news_md")}
-df = df_comb[df_comb["actual_lang"] == lang_interested].reset_index(drop=True)
+lang = sys.argv[1] ##lang is specified in the parameter <lang> when we run the script
+lang_models = {"en": spacy.load("en_core_web_md"), "it": spacy.load("it_core_news_md"), "ru": spacy.load("ru_core_news_md")}
+df = df_comb[df_comb["actual_lang"] == lang].reset_index(drop=True)
 ```
 
 I will focus on the 'content' column, where I will tokenize, lemmatize and remove stopwords (*is_stop*) for each language of interest, while keeping alphabetic characters (*is_alpha*)
@@ -152,17 +152,14 @@ for summary in nlp.pipe(df["content"]):
 The two main inputs to the topic model which I will be using (LDA) are the dictionary and the corpus:
 
 Dictionary: The idea of the dictionary is to give each token a unique ID.
-Corpus: Having assigned a unique ID to each token, the corpus simply contains each ID and its frequency (if you wanna dive into it, then search for Bag of Word (BoW) which will introduce you to word embedding).
+Corpus: Having assigned a unique ID to each token, the corpus simply contains each ID and its frequency. LDA is a "bag-of-words" model, which means that the order of words does not matter.
 
-I will apply the Dictionary Object from Gensim, which maps each word to their unique ID
-
-I will filter out low-frequency and high-frequency tokens, also limit the vocabulary to a max of 1000 words.
+I will apply the Dictionary Object from Gensim, which maps each word to their unique ID, and will filter out low-frequency and high-frequency tokens, limiting the vocabulary to a max of 1000 words.
 
 ```python
 dictionary.filter_extremes(no_below=5, no_above=0.5, keep_n=1000) #keep 1000 most unique tokens
 ```
-
-We are now ready to construct the corpus using the dictionary from above and the doc2bow function. The function doc2bow() simply counts the number of occurrences of each distinct word, converts the word to its integer word id and returns the result as a sparse vector.
+I will construct the corpus using the above filtered dictionary and the doc2bow function. The function doc2bow() simply counts the number of occurrences of each distinct word, converts the word to its integer word id and returns the result as a sparse vector.
 
 ```python
 corpus = [dictionary.doc2bow(doc) for doc in df['tokens']]
@@ -170,7 +167,9 @@ corpus = [dictionary.doc2bow(doc) for doc in df['tokens']]
 
 ### 4. Cluster Documents into Logical Groups
 
-The next step is to train the unsupervised machine learning model on the data. There are many models which can be used for clustering of such documents, such as Latent Semantic Analysis (LSA), and Latent Dirichlet Allocation (LDA). In this case, I choose to work with LDA. The purpose of LDA is mapping each document in our corpus to a set of topics which cover a good deal of words in that document  I choose to work with the LdaMulticore, which uses all CPU cores to parallelize and speed up model training. 
+The next step is to train the unsupervised machine learning model on the data. There are many models which can be used for clustering of such documents, such as Latent Semantic Analysis (LSA), and Latent Dirichlet Allocation (LDA). As mentioned above, in this case I choose to work with LDA. The purpose of LDA is mapping each document in our corpus to a set of topics which cover a good deal of words in that document. 
+
+I choose to work with the LdaMulticore, which uses all CPU cores to parallelize and speed up model training. 
 
 When inserting our corpus into the topic modelling algorithm, the corpus gets analyzed in order to find the distribution of words in each topic and the distribution of topics in each document.
 
