@@ -1,0 +1,12 @@
+openpyxl == 3.0.10
+pandas == 1.4.3
+numpy == 1.23.1
+matplotlib == 3.5.2
+seaborn == 0.11.2
+spacy == 3.4.1
+gensim == 4.2.0
+wikipedia == 1.4.0
+#python -m spacy download en_core_web_md
+#python -m spacy download ru_core_news_md
+#python -m spacy download it_core_news_md
+
