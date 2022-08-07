@@ -69,15 +69,17 @@ Hence I query articles of these 51 celebrities in 3 different languages: English
 
 ```python
 articles = ['George_Clooney', 'Shah_Rukh_Khan', 'Leonardo_DiCaprio'] #snippet of actual number of articles
-wikipedia.set_lang("en") 
-wiki_lst=[]
-title=[]
-for article in articles:
-    print("loading content: ",article)
-    wiki_lst.append(wikipedia.page(article,auto_suggest=False).content) ##appending items to list
-    title.append(article)
+print("Obtaining English data now")
+wikipedia.set_lang("en")
+content = []
+person = []
 
-df = pd.DataFrame({'name': title, 'content': wiki_lst})
+for i in articles:
+#     print("Examining " + str(i))
+    person.append(wikipedia.page(i, auto_suggest=False).title) ##appending title to list
+    content.append(wikipedia.page(i, auto_suggest=False).content) ## appending content to list
+    
+df = pd.DataFrame(list(zip(person,content)), columns=['person', 'content'])
 ## combine all three df's into df_comb
 ```
 
