@@ -1,5 +1,7 @@
 import time
 startTime = time.time()
+import warnings
+warnings.filterwarnings('ignore')
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -13,29 +15,30 @@ from gensim.models import LdaModel
 from gensim.models import CoherenceModel
 
 import sys
-lang = sys.argv[1]
 
-# lang = "en"
-print("Reading in data now.")
+try:
+    lang = sys.argv[1]
+except:
+    print("Please input a language parameter [en, ru, it] in order to run the script.")
+    exit()
+
+print("Reading in input data now.")
 df_comb = pd.read_excel("./files/input/combined_data.xlsx")
 
 from langdetect import detect, DetectorFactory
 DetectorFactory.seed = 0
 
 df_comb["actual_lang"] = df_comb["content"].apply(detect)
-
+print("Filtering data to account for content with language detected as " + str(lang))
 df = df_comb[df_comb["actual_lang"] == str(lang)].reset_index(drop=True)
-
-import warnings
-warnings.filterwarnings('ignore')
 lang_models = {"en": spacy.load("en_core_web_md"), "it": spacy.load("it_core_news_md"), "ru": spacy.load("ru_core_news_md")}
 
 # Our spaCy model:
 nlp = lang_models[str(lang)]
 
 print("Loading " + str(lang) + " model")
-# Tags I want to remove from the text
 
+# Tags I want to remove from the text
 print("Tokenizing, lemmatizing and removing stopwords.")
 removal= ['ADV','PRON','CCONJ','PUNCT','PART','DET','ADP','SPACE', 'NUM', 'SYM']
 tokens = []
@@ -45,6 +48,7 @@ for summary in nlp.pipe(df['content']):
     
 df['tokens'] = tokens
 
+print("Creating dictionary and corpus")
 dictionary = Dictionary(df['tokens'])
 
 dictionary.filter_extremes(no_below=5, no_above=0.5, keep_n=1000)

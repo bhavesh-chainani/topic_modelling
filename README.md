@@ -147,6 +147,16 @@ for summary in nlp.pipe(df["content"]):
     tokens.append(proj_tok)
 ```
 
+Showcased below is the updated dataframe snippet with the tokens appended to the corresponding information
+
+|   |            person |                                           content | actual_lang |                                            tokens |
+|--:|------------------:|--------------------------------------------------:|------------:|--------------------------------------------------:|
+| 0 |    George Clooney | George Timothy Clooney (born May 6, 1961) is a... |          en | [george, timothy, clooney, bear, american, act... |
+| 1 |    Shah Rukh Khan | Shah Rukh Khan (pronounced [ˈʃɑːɦɾʊx xɑːn]; bo... |          en | [shah, rukh, khan, pronounce, ˈʃɑːɦɾʊx, xɑːn, ... |
+| 2 | Leonardo DiCaprio | Leonardo Wilhelm DiCaprio (; Italian: [diˈkaːp... |          en | [leonardo, wilhelm, dicaprio, italian, diˈkaːp... |
+
+As we can see, some of these tokens have different languages, even though the dataframe has already been filtered to focus on english-detected texts. Some of these texts in different languages may be important, especially if they have a high frequency and are not stop words. Hence, I will leave such words in, which may then be filtered out when we create our dictionary.
+
 ### Create Dictionary and Corpus
 
 The two main inputs to the topic model which I will be using (LDA) are the dictionary and the corpus:
@@ -159,13 +169,23 @@ I will apply the Dictionary Object from Gensim, which maps each word to their un
 ```python
 dictionary.filter_extremes(no_below=5, no_above=0.5, keep_n=1000) #keep 1000 most unique tokens
 ```
-I will construct the corpus using the above filtered dictionary and the doc2bow function. The function doc2bow() simply counts the number of occurrences of each distinct word, converts the word to its integer word id and returns the result as a sparse vector.
+
+Showcased below is part of the filtered dictionary.
+
+**{'abuse': 0, 'accept': 1, 'acclaim': 2, 'accolade': 3, 'account': 4, 'accuse': 5, ... }**
+
+I will construct the corpus using the above filtered dictionary and the doc2bow function. The function doc2bow() simply counts the number of occurrences of each distinct word, converts the word to its integer word id and returns the result as a sparse vector. In order words, this function converts a collection of words to its bag-of-words representation: a list of (token_id, token_count) 2 tuples.
 
 ```python
 corpus = [dictionary.doc2bow(doc) for doc in df['tokens']]
+print(corpus[:1])
 ```
 
-### 4. Cluster Documents into Logical Groups
+```[[(0, 1), (1, 1), (2, 4), (3, 1), (4, 1), (5, 1), (6, 2) ... ]]```
+
+Gensim creates a unique id for each word in the document. The produced corpus shown above is a mapping of (word_id, word_frequency). For example, (0, 1) above implies, word id 0 occurs once in the first document. Likewise, word id 2 occurs four times and so on.
+
+### **4. Cluster Documents into Logical Groups**
 
 The next step is to train the unsupervised machine learning model on the data. There are many models which can be used for clustering of such documents, such as Latent Semantic Analysis (LSA), and Latent Dirichlet Allocation (LDA). As mentioned above, in this case I choose to work with LDA. The purpose of LDA is mapping each document in our corpus to a set of topics which cover a good deal of words in that document. 
 
@@ -173,9 +193,13 @@ I choose to work with the LdaMulticore, which uses all CPU cores to parallelize 
 
 When inserting our corpus into the topic modelling algorithm, the corpus gets analyzed in order to find the distribution of words in each topic and the distribution of topics in each document.
 
-As input, I give the model our corpus and dictionary from before; besides, I choose to iterate over the corpus 50 times to optimize the model parameters (this is the default value). The pass is 10, which means the model will pass through the corpus ten times during training.
+As input, I give the model our corpus and dictionary from before; besides, I choose to iterate over the corpus 100 times to optimize the model parameters. The pass is 10, which means the model will pass through the corpus ten times during training.
 
 I first pass a baseline model, setting the number of topics to 10.
+
+*chunk_size* is the number of documents to be used in each training chunk
+*passes* is the total number of training passes
+*per_word_topics* allows the model to compute a list of topics, sorted in descending order of most likely topics of each word
 
 ```python
 lda_model = LdaMulticore(corpus=corpus,
@@ -184,26 +208,85 @@ lda_model = LdaMulticore(corpus=corpus,
                        random_state=100,
                        iterations=100,
                        chunksize=100,
-                       passes=100,
+                       passes=10,
                        per_word_topics=True)
 ```
 
-Hyperparameter Tuning
+We can print the keywords in th 10 topics for this baseline model
 
-First, let’s differentiate between model hyperparameters and model parameters :
+```
+[(0,
+  '0.067*"king" + 0.045*"rock" + 0.028*"novel" + 0.019*"publish" + '
+  '0.015*"match" + 0.013*"championship" + 0.012*"character" + 0.011*"episode" '
+  '+ 0.008*"football" + 0.007*"read"'),
+ (1,
+  '0.071*"india" + 0.046*"page" + 0.034*"indian" + 0.027*"score" + '
+  '0.023*"match" + 0.021*"test" + 0.012*"romance" + 0.011*"ceo" + '
+  '0.010*"average" + 0.009*"century"'),
+ (2,
+  '0.089*"defeat" + 0.057*"match" + 0.056*"grand" + 0.038*"french" + '
+  '0.031*"court" + 0.026*"ranking" + 0.026*"round" + 0.025*"season" + '
+  '0.022*"double" + 0.019*"era"'),
+ (3,
+  '0.061*"clinton" + 0.033*"obama" + 0.023*"law" + 0.021*"election" + '
+  '0.015*"presidential" + 0.011*"bill" + 0.010*"political" + 0.009*"health" + '
+  '0.009*"vote" + 0.009*"hillary"'),
+ (4,
+  '0.061*"season" + 0.058*"player" + 0.057*"score" + 0.053*"goal" + '
+  '0.050*"match" + 0.035*"league" + 0.021*"defeat" + 0.021*"finish" + '
+  '0.020*"cup" + 0.016*"injury"'),
+ (5,
+  '0.074*"album" + 0.045*"song" + 0.042*"music" + 0.024*"artist" + '
+  '0.020*"tour" + 0.019*"chart" + 0.019*"awards" + 0.018*"billboard" + '
+  '0.014*"studio" + 0.014*"uk"'),
+ (6,
+  '0.030*"actor" + 0.018*"drama" + 0.013*"comedy" + 0.013*"box" + '
+  '0.012*"nomination" + 0.011*"gross" + 0.011*"awards" + 0.011*"direct" + '
+  '0.010*"critical" + 0.009*"production"'),
+ (7,
+  '0.012*"private" + 0.010*"worth" + 0.010*"cross" + 0.009*"purchase" + '
+  '0.009*"energy" + 0.009*"net" + 0.009*"ceo" + 0.008*"found" + 0.008*"brown" '
+  '+ 0.008*"computer"'),
+ (8,
+  '0.028*"party" + 0.013*"russia" + 0.013*"russian" + 0.013*"government" + '
+  '0.013*"leader" + 0.012*"minister" + 0.012*"election" + 0.011*"china" + '
+  '0.009*"policy" + 0.009*"secretary"'),
+ (9,
+  '0.059*"novel" + 0.021*"brown" + 0.019*"publish" + 0.013*"character" + '
+  '0.012*"fiction" + 0.011*"writing" + 0.010*"copy" + 0.010*"read" + '
+  '0.009*"british" + 0.009*"daughter"')]
+```
 
-Model hyperparameters can be thought of as settings for a machine learning algorithm that are tuned by the data scientist before training. Examples would be the number of trees in the random forest, or in our case, number of topics K
+### **Compute Model Perplexity and Coherence Score**
 
-Model parameters can be thought of as what the model learns during training, such as the weights for each word in a given topic
+Model perplexity and topic coherence provide a convenient measure to judge how good a given topic model. In this project, I will particularly focus on topic coherence score, by identifying the number of topics which maximises this metric. The Coherence score creates content vectors of words using their co-occurrences and, after that, calculates the score using normalized pointwise mutual information (NPMI) and the cosine similarity. This snippet of code showcases how the scores and topic numbers are iterated through the model.
 
-Now that we have the baseline coherence score for the default LDA model, let’s perform a series of sensitivity tests to help determine the following model hyperparameters:
+```python
+topics = []
+score = []
+for i in range(1,10,1):
+    print("Running iteration number " + str(i))
+    lda_model = LdaMulticore(corpus=corpus, id2word=dictionary, iterations=100, num_topics=i, workers = 4, passes=10, random_state=100, chunksize=100)
+    cm = CoherenceModel(model=lda_model, texts = df['tokens'], corpus=corpus, dictionary=dictionary, coherence='c_v')
+    topics.append(i)
+    score.append(cm.get_coherence())
+```
+
+For the English language text in our corpus, the optimal number of topics to maximise coherence score is 7.
+
+![Coherence Score for English Model](files/documentation//coherence_score_en.png)
+
+#### **Further Hyperparameter Tuning**
+
+Now that we have the baseline coherence score for the default LDA model, we can perform a series of sensitivity tests to help determine the following model hyperparameters:
 
 Number of Topics (K)
 Dirichlet hyperparameter alpha: Document-Topic Density
 Dirichlet hyperparameter beta: Word-Topic Density
-We’ll perform these tests in sequence, one parameter at a time by keeping others constant and run them over the two different validation corpus sets. We’ll use C_v as our choice of metric for performance comparison.
 
-These tests have been performed on the English corpora and saved in the .csv file
+These tests will be performed in sequence, one parameter at a time by keeping others constant and run them over the two different validation corpus sets. We’ll use C_v as our choice of metric for performance comparison.
+
+These tests have been performed on the English corpora and saved in the "./files/output/en" folder.
 
 Due to memory constraints, I will only be changing the number of topics for all three languages, and will not change the alpha and beta values, given that the change in coherence score is not that much.
 
@@ -211,7 +294,7 @@ The most ideal model will be to use LDAMulticore, which parallelizes and maximis
 
 Also, due to memory constraints and assuming that the end-user is running the model on a CPU, I have saved the models for all three languages
 
-### 5. Finding Optimal Number of Topics
+### **5. Finding Optimal Number of Topics**
 
 Having trained the model, the next natural step is to evaluate it. After having constructed the topics, a coherence score can be computed. The score measures the degree of semantic similarity between high scoring words in each topic. In this fashion, a coherence score can be computed for each iteration by inserting a varying number of topics.
 
