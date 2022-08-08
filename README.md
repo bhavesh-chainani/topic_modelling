@@ -289,7 +289,13 @@ Dirichlet hyperparameter beta: Word-Topic Density
 
 These tests will be performed in sequence, one parameter at a time by keeping others constant and run them over the two different validation corpus sets. We’ll use C_v as our choice of metric for performance comparison.
 
-These tests have been performed on the English corpora and saved in the "./files/output/en" folder. Such tests can also be carried out for the other two corpora, but have not been run due to memory constraints.
+These tests have been performed on the all three corpora and saved in the "./files/output/[lang]" folder. Showcased is a snippet of how the coherence score changes with the alpha and beta values for the English corpora (given a fixed topic number).
+
+| Validation_Set | Topics | Alpha | Beta      | Coherence  |
+|----------------|--------|-------|-----------|------------|
+| 100% Corpus    | 7      | 0.01  | 0.91      | 0.60729985 |
+| 100% Corpus    | 7      | 0.01  | symmetric | 0.62035295 |
+| 100% Corpus    | 7      | 0.31  | 0.01      | 0.70014313 |
 
 ### **5. Finding Optimal Number of Topics**
 
