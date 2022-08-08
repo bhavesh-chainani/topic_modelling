@@ -60,3 +60,4 @@ print("Italian dataframe has been created")
 df_comb = pd.concat([df_eng, df_it, df_ru], axis=0).reset_index(drop=True)
 
 df_comb.to_excel("./files/input/combined_data.xlsx",index=False)
+print("Combined dataframe has been saved in ./files/input folder.")

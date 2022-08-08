@@ -22,6 +22,7 @@ except:
     print("Please input a language parameter [en, ru, it] in order to run the script.")
     exit()
 
+
 print("Reading in input data now.")
 df_comb = pd.read_excel("./files/input/combined_data.xlsx")
 
@@ -31,6 +32,7 @@ DetectorFactory.seed = 0
 df_comb["actual_lang"] = df_comb["content"].apply(detect)
 print("Filtering data to account for content with language detected as " + str(lang))
 df = df_comb[df_comb["actual_lang"] == str(lang)].reset_index(drop=True)
+
 lang_models = {"en": spacy.load("en_core_web_md"), "it": spacy.load("it_core_news_md"), "ru": spacy.load("ru_core_news_md")}
 
 # Our spaCy model:
@@ -67,9 +69,7 @@ corpus = [dictionary.doc2bow(doc) for doc in df['tokens']]
 # num_topics = topics[score.index(max(score))]
 
 topic_lang = {"en": 7, "it": 6, "ru": 5} 
-
 num_topics = topic_lang[lang]
-
 print("Number of topics with highest coherence score for " + str(lang) + " model is: " + str(num_topics))
 
 # lda_model = LdaMulticore(corpus=corpus, id2word=dictionary, iterations=100, num_topics=num_topics, workers = 4, passes=100)

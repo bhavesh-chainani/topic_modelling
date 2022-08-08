@@ -30,6 +30,9 @@ This README will explain the end-to-end analysis on topic modelling. It will exp
 Create a virtual environment, and run requirements.txt in that venv to install the relevant packages.
 ```python
 pip install -r requirements.txt
+python -m spacy download en_core_web_md 
+python -m spacy download it_core_news_md
+python -m spacy download ru_core_news_md
 ```
 
 ### Step 2.
@@ -259,7 +262,7 @@ We can print the keywords in th 10 topics for this baseline model
 
 ### **Compute Model Perplexity and Coherence Score**
 
-Model perplexity and topic coherence provide a convenient measure to judge how good a given topic model. In this project, I will particularly focus on topic coherence score, by identifying the number of topics which maximises this metric. The Coherence score creates content vectors of words using their co-occurrences and, after that, calculates the score using normalized pointwise mutual information (NPMI) and the cosine similarity. This snippet of code showcases how the scores and topic numbers are iterated through the model.
+Model perplexity and topic coherence provide a convenient measure to judge how good a given topic model. In this project, I will particularly focus on topic coherence score, by identifying the number of topics which maximises this metric. The score measures the degree of semantic similarity between high scoring words in each topic. In this fashion, a coherence score can be computed for each iteration by inserting a varying number of topics. This snippet of code showcases how the scores and topic numbers are iterated through the model.
 
 ```python
 topics = []
@@ -286,39 +289,44 @@ Dirichlet hyperparameter beta: Word-Topic Density
 
 These tests will be performed in sequence, one parameter at a time by keeping others constant and run them over the two different validation corpus sets. We’ll use C_v as our choice of metric for performance comparison.
 
-These tests have been performed on the English corpora and saved in the "./files/output/en" folder.
-
-Due to memory constraints, I will only be changing the number of topics for all three languages, and will not change the alpha and beta values, given that the change in coherence score is not that much.
-
-The most ideal model will be to use LDAMulticore, which parallelizes and maximises CPU usage to increase runtime.
-
-Also, due to memory constraints and assuming that the end-user is running the model on a CPU, I have saved the models for all three languages
+These tests have been performed on the English corpora and saved in the "./files/output/en" folder. Such tests can also be carried out for the other two corpora, but have not been run due to memory constraints.
 
 ### **5. Finding Optimal Number of Topics**
 
-Having trained the model, the next natural step is to evaluate it. After having constructed the topics, a coherence score can be computed. The score measures the degree of semantic similarity between high scoring words in each topic. In this fashion, a coherence score can be computed for each iteration by inserting a varying number of topics.
+Due to memory constraints, I will only be changing the number of topics for all three languages, and will not change the alpha and beta values, given that the change in coherence score is not that much.
 
-A range of algorithms has been introduced to calculate the coherence score (C_v, C_p, C_uci, C_umass, C_npmi, C_a, …). Working with the gensim library makes computing these coherence measures for topic models fairly simple. I personally choose to implement C_v and C_umass. The coherence score for C_v ranges from 0 (complete incoherence) to 1 (complete coherence). Values above 0.5 are fairly good, according to John McLevey
+The most ideal model will be to use LDAMulticore, which parallelizes and maximises CPU usage to increase runtime. However, assuming the user is running the code on a CPU, I have already run the python script (scripts/topic_modelling.py) for each language to obtain the number of topics to obtain the highest coherence score.
 
-Below I simply iterate through a different number of topics and save the coherence score in a list. Afterwards, I plot using seaborn.
+```
+Optimal Number of Topics 
+"en": 7
+"it": 6
+"ru": 5 
+```
 
-When looking at the coherence using the C_umass or C_v algorithm, the best is usually the max. Looking at the graphs I choose to go with 6 topics, although no certain answer can be given. 
+The full code, along with an end-to-end hyperparamter tuning is available in scripts/topic_modelling_full.ipynb for the user to tweak the parameters and re-run their own model.
 
-Further hyperparameter tuning is done to get the optimal alpha and beta value along with the optimal C_v score.
+## **Results**
 
-For all three languages, the optimal number of topics is 5. This does not mean that all these 5 topics may be the same, given how each word interacts with one another for these 3 different languages.
-
-### Visualisation
+### **Visualisation**
 
 I use PCA to reduce the dimensionality of the data and visualise the output, using pyLDAvis.
 
 As we have shown earlier, we can evaluate the topic clustering results by reviewing all the topics and their associated words case by case. This is totally fine, but may not be very convenient especially when the cluster counts get larger. Luckily, there is a popular visualization package that can be used to visualize the topic clusters in an interactive manner. On a high level, there are mainly two interactive elements in the generated plot you can play with:
 
 The relevance metrics λ. Relevance denotes the degree to which a term appears in a particular topic to the exclusion of others. When λ = 1, the terms are ranked by their probabilities within the topic (the ‘regular’ method) while when λ = 0, the terms are ranked only by their lift. Lift is the ratio of a term’s probability within a topic to its margin probability across the corpus. On a high level, the lift is trying to measure similar effects as TF-IDF vectorization.
+
 Inter-topic Distance Map. The user is able to navigate through different topic clusters in the GUI here, and users can have a good overview of how different topic clusters are separated from each other also. Generally speaking, the further away between all the topic clusters, the better the segmentation results are.
 
+![Visualisation of Topics for English](files/documentation//lda_en.png)
 
-## Results & Discussion
+Upon performing hyperparameter tuning and obtaining the highest coherence score for each respective language model, the optimal number of topics are obtained.
+
+
+##showcase example fo output of lda model
+
+## showcase final dataframe added to output
+
 
 Researchers have developed approaches to obtain an optimal number of topics by using Kullback Leibler Divergence Score. Hence this can be used in place of the score to get a more accurate understanding on the number of topics to use.
 
@@ -335,22 +343,21 @@ Common LDA limitations:
 
 ## Discussion
 
-1. Benefits of LDA
+**1. Benefits of LDA**
 As we are looking at large chunks of content for each celebrity, LDA can be used for easier interpretation to understand the type of topics each article contains.
 
-## 2. Disadvantages of LDA
-#### Inability to scale
+**2. Disadvantages of LDA**
+**Inability to scale**
 LDA has been criticized for not being able to scale due to the linearity of the technique it is based on. Hence, besides LDA, we can try other variants such as pLSI, the probabilistic variant of LSI, which solves this challenge by using a statistical foundation and working with a generative model.
 
-#### Self interpreation of topics
+**Self interpreation of topics**
 Using LDA for topic modelling results in the user's interpretability of what each topic group should be labelled as.
 
 With various languages, with hyperparameter tuning, the optimal number of topics are different, hence it is difficult to identify the number of topics to apply LDA model on across these three different langauges.
 
 Once trained, most topic models cannot deal with unseen words, this is because they are based on Bag of Words (BoW) representations, which cannot account for missing terms.
 
-## Proposing a better model
-
+## Suggested Improvements
 Overcoming that issue using Zero-shot cross-lingual topic modeling with ZeroShotTM, able to retrain the model just using English corpus then test on unseen corpus of different languages using multilingual BERT. This utilises transfer learning, assuming that our main form of interpretation is English and that these documents are the same (which applies in this case).
 
 There is one key assumption for this project as these documents are all the same, but in different languages. Hence it is not ideal if there are documents of different languages and similar contents which we want to group together.
