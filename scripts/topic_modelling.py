@@ -18,8 +18,9 @@ import sys
 
 try:
     lang = sys.argv[1]
+    print("Running topic modelling in " + str(lang) + " language"
 except:
-    print("Please input a language parameter [en, ru, it] in order to run the script.")
+    print("Please input a language parameter [en, ru, it] in order to run the script")
     exit()
 
 
@@ -58,6 +59,8 @@ dictionary.filter_extremes(no_below=5, no_above=0.5, keep_n=1000)
 corpus = [dictionary.doc2bow(doc) for doc in df['tokens']]
 
 
+## Code to plot coherence plot for each topic number (present in topic_modelling_full.ipynb file as well)
+          
 # topics = []
 # score = []
 # for i in range(1,10,1):
@@ -68,12 +71,20 @@ corpus = [dictionary.doc2bow(doc) for doc in df['tokens']]
 #     score.append(cm.get_coherence())
 # num_topics = topics[score.index(max(score))]
 
-topic_lang = {"en": 7, "it": 6, "ru": 5} 
+topic_lang = {"en": 7, "it": 6, "ru": 5}
+topic_alpha = {"en": "symmetric", "it": "asymmetric", "ru": "symmetric"}
+topic_beta = {"en": 0.01, "it": 0.91, "ru": "symmetric"}
+
 num_topics = topic_lang[lang]
 print("Number of topics with highest coherence score for " + str(lang) + " model is: " + str(num_topics))
 
+alpha = topic_alpha[lang]
+beta = topic_beta[lang]
+          
+print("Optimal Parameters for " + str(lang) + " have been obtained. Running model now.")
+
 # lda_model = LdaMulticore(corpus=corpus, id2word=dictionary, iterations=100, num_topics=num_topics, workers = 4, passes=100)
-lda_model = LdaModel(corpus=corpus, id2word=dictionary, iterations=100, num_topics=num_topics, passes=100)
+lda_model = LdaModel(corpus=corpus, id2word=dictionary, iterations=100, num_topics=num_topics, passes=100, alpha = alpha, eta = beta, random_state=100)
 
 # lda_display = pyLDAvis.gensim_models.prepare(lda_model, corpus, dictionary, sort_topics=False)
 # pyLDAvis.save_html(lda_display, "./files/output/" + str(lang) + "/lda_" + str(lang) + ".html")
@@ -105,8 +116,9 @@ df_topic_sents_keywords = format_topics_sentences(ldamodel=lda_model, corpus=cor
 df_dominant_topic = df_topic_sents_keywords.reset_index(drop=True)
 df_dominant_topic.columns = ['Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords']
 df_dominant_topic = pd.concat([df,df_dominant_topic], axis=1)
+df_dominant_topic = df_dominant_topic.sort_values(by='Topic_Perc_Contrib',ascending=False).reset_index(drop=True)
 
-writer = pd.ExcelWriter('./files/output/' +str(lang) + '/topic_modelling_output_' + str(lang) + '.xlsx' , engine='xlsxwriter')
+writer = pd.ExcelWriter('./files/output/' + str(lang) + '/topic_modelling_output_' + str(lang) + '.xlsx' , engine='xlsxwriter')
 workbook = writer.book
 workbook.formats[0].set_font_size(12)
 df_dominant_topic.to_excel(writer, sheet_name = 'Output', index=False)

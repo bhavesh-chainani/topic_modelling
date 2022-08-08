@@ -16,8 +16,7 @@ This README will explain the end-to-end analysis on topic modelling. It will exp
 4. scripts
     - /wikipedia_scraping.py - contains the script to extract wikipedia articles in different languages and save the dataframe in input/ folder
     - /topic_modelling.py - contains the script to identify the language, preprocess and group the data using LDA
-    - /hyperparameter_tuning - contains an example of in-depth hyper-parameter tuning done to account for different parameters so as to maximise coherence score.
-    - /topic_modelling_further_analysis.ipynb - contains some examples of hyperparameter tuning done
+    - /topic_modelling_full_analysis.ipynb - contains some examples of hyperparameter tuning done
 5. files
    - /input - contains the input dataframe for running the topic modelling algorithm
    - /output - contains the output dataframe, coherence plot and visualisation file for each language [en, ru, it]
@@ -301,7 +300,7 @@ These tests have been performed on the all three corpora and saved in the "./fil
 
 In this example, I will only be changing the number of topics for all three languages, and will not change the alpha and beta values, given that the change in coherence score is not that much.
 
-The most ideal model will be to use LDAMulticore, which parallelizes and maximises CPU usage to increase runtime. However, assuming the user is running the code on a CPU, I have already run the python script (scripts/topic_modelling.py) for each language to obtain the number of topics to obtain the highest coherence score. The ipynb file (scripts/topic_modelling.ipynb) will contain the LDAMultiCore model. The main difference between these two models is the ability to parallelise the CPU workers, increasing the runtime for the model.
+The most ideal model will be to use LDAMulticore, which parallelizes and maximises CPU usage to increase runtime. However, assuming the user is running the code on a CPU, I have already run the python script (scripts/topic_modelling.py) for each language to obtain the number of topics to obtain the highest coherence score. The ipynb file (scripts/topic_modelling_full_analysis.ipynb) will contain the LDAMultiCore model. The main difference between these two models is the ability to parallelise the CPU workers, increasing the runtime for the model.
 
 ```
 ## Optimal Parameters (pre-run)
@@ -317,7 +316,7 @@ The optimal model is then run with the best parameters for that particular langu
 lda_model = LdaMulticore(corpus=corpus, id2word=dictionary, iterations=100, num_topics=num_topics, workers = 4, passes=100, alpha=alpha, eta=beta, random_state=100)
 ```
 
-The full code, along with an end-to-end hyperparamter tuning is available in scripts/topic_modelling_full.ipynb for the user to tweak the parameters and re-run their own model.
+The full code, along with an end-to-end hyperparamter tuning is available in scripts/topic_modelling_full_analysis.ipynb for the user to tweak the parameters and re-run their own model.
 
 
 ## **Results**
@@ -398,26 +397,28 @@ Common LDA limitations:
 **Inability to scale**
 LDA has been criticized for not being able to scale due to the linearity of the technique it is based on. Hence, besides LDA, we can try other variants such as pLSI, the probabilistic variant of LSI, which solves this challenge by using a statistical foundation and working with a generative model.
 
-**Self interpreation of topics**
+**Self interpretation of topics**
+
 Using LDA for topic modelling results in the user's interpretability of what each topic group should be labelled as.
 
 With various languages, with hyperparameter tuning, the optimal number of topics are different, hence it is difficult to identify the number of topics to apply LDA model on across these three different langauges.
 
 Once trained, most topic models cannot deal with unseen words, this is because they are based on Bag of Words (BoW) representations, which cannot account for missing terms.
 
+**Unsupervised Learning**
+
+Since LDA is an unsupervised learning method, it primarily focuses on inferring topics that maximise the likelihood of the collection. Even if we were to apply a supervised machine learning algorithm, currently available topic models suffer from two limitations: (i) they cannot handle unknown words by default, and (ii) they cannot easily be applied to other languages- except the one in the training data- since the vocabulary would not match. Training on several languages together, though, results in a vocabulary so vast that it creates problems with parameter size, search, and overfitting.
+
 ## **Suggested Improvements**
 
-Researchers have developed approaches to obtain an optimal number of topics by using Kullback Leibler Divergence Score. Hence this can be used in place of the score to get a more accurate understanding on the number of topics to use.
+With a cross-lingual zero-shot topic model (ZeroShotTM) (https://aclanthology.org/2021.eacl-main.143.pdf), we can first learn topics on English and then predict topics for documents in that other language(as long as we use pre-trained representations that account for both English and the other language). This allows us to retrain the model just using English corpus then test on unseen corpus of different languages using multilingual BERT. This utilises transfer learning, assuming that our main form of interpretation is English and that these documents are in the same domain (which applies in this case).
 
-Overcoming that issue using Zero-shot cross-lingual topic modeling with ZeroShotTM, able to retrain the model just using English corpus then test on unseen corpus of different languages using multilingual BERT. This utilises transfer learning, assuming that our main form of interpretation is English and that these documents are the same (which applies in this case).
+We can also apply Multilingual Dynamic Topic Modelling (MLTM) (https://github.com/ezosa/multilingual_dtm).
 
-There is one key assumption for this project as these documents are all the same, but in different languages. Hence it is not ideal if there are documents of different languages and similar contents which we want to group together.
-
-So why we need another kind of topic model for multilingual datasets when we can just apply LDA on documents from each language separately? The main advantage of MLTM over this approach is that MLTM aligns topics across languages while LDA cannot guarantee this. This is important because one of the benefits of MLTM is that it can be used for cross-lingual document retrieval. For instance, a user might find a German news article of interest and wants to find similar articles in French or Finnish. Without any knowledge of these languages we can retrieve such articles quickly using MLTM.
+The main advantage of MLTM over this approach is that MLTM aligns topics across languages while LDA cannot guarantee this. This is important because one of the benefits of MLTM is that it can be used for cross-lingual document retrieval. For instance, a user might find a German news article of interest and wants to find similar articles in French or Finnish. Without any knowledge of these languages we can retrieve such articles quickly using MLTM.
 
 
-## Contributers
+## **Contributers**
 #### Bhavesh Chainani
 #### Data Scientist
 #### August 2022
-
