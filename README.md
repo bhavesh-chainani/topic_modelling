@@ -335,7 +335,7 @@ The full code, along with an end-to-end hyperparameter tuning is available in sc
 
 ## **Results**
 
-We can now print out the seven topics (for en corpora) and the related words:
+We can now print out the 7 topics (for en corpora) and the related words:
 
 ```
 [(0,
@@ -368,7 +368,7 @@ lda_model[corpus][0]
 [(0, 0.18102325), (3, 0.19519578), (6, 0.6111178)]
 ```
 
-In LDA models, each document is composed of multiple topics. But, typically only one of the topics is dominant. Hence, I created the python script assigns the most probable topic to each celebrity and appends it to the current dataframe. Showcased below is a snippet of the final dataframe output, which has been saved as an excel file in ./files/output/[lang]/topic_modelling_output_[lang].xlsx
+In LDA models, each document is composed of multiple topics. But, typically only one of the topics is dominant. Hence, the pytho script (scripts/topic_modelling.py) assigns the most probable topic to each celebrity and appends it to the current dataframe. Showcased below is a snippet of the final dataframe output, which has been saved as an excel file as ./files/output/[lang]/topic_modelling_output_[lang].xlsx
 
 |   |          person |                                           content | actual_lang |                                            tokens | Dominant_Topic | Topic_Perc_Contrib |                                          Keywords |
 |--:|----------------:|--------------------------------------------------:|------------:|--------------------------------------------------:|---------------:|-------------------:|--------------------------------------------------:|
@@ -378,35 +378,27 @@ In LDA models, each document is composed of multiple topics. But, typically only
 | 3 |      Ed Sheeran |  Edward Christopher Sheeran (; born 17 Februar... |          en | [edward, christopher, sheeran, bear, february,... |              5 |             0.9990 | album, song, music, artist, tour, chart, award... |
 | 4 |      Larry Page | Lawrence Edward Page (born March 26, 1973) is ... |          en | [lawrence, edward, page, bear, march, american... |              1 |             0.9990 | india, page, ceo, test, indian, computer, wort... |
 
-### **Visualisation**
+## **Visualisation**
 
-I use PCA to reduce the dimensionality of the data and visualise the output, using pyLDAvis.
-
-As we have shown earlier, we can evaluate the topic clustering results by reviewing all the topics and their associated words case by case. This is totally fine, but may not be very convenient especially when the cluster counts get larger. Luckily, there is a popular visualization package that can be used to visualize the topic clusters in an interactive manner. On a high level, there are mainly two interactive elements in the generated plot you can play with:
+I use PCA to reduce the dimensionality of the data and visualise the output, using pyLDAvis. pyLDAvis is used to visualize the topic clusters in an interactive manner. On a high level, there are mainly two interactive elements in the generated plot we can change:
 
 **The relevance metrics λ.**
-Relevance denotes the degree to which a term appears in a particular topic to the exclusion of others. When λ = 1, the terms are ranked by their probabilities within the topic (the ‘regular’ method) while when λ = 0, the terms are ranked only by their lift. Lift is the ratio of a term’s probability within a topic to its margin probability across the corpus. On a high level, the lift is trying to measure similar effects as TF-IDF vectorization.
+Relevance denotes the degree to which a term appears in a particular topic to the exclusion of others. When λ = 1, the terms are ranked by their probabilities within the topic (the 'regular' method) while when λ = 0, the terms are ranked only by their lift. Lift is the ratio of a term’s probability within a topic to its margin probability across the corpus. On a high level, the lift is trying to measure similar effects as TF-IDF vectorization.
 
 **Inter-topic Distance Map.**
 The user is able to navigate through different topic clusters in the GUI here, and users can have a good overview of how different topic clusters are separated from each other also. Generally speaking, the further away between all the topic clusters, the better the segmentation results are.
 
+These interactive plots have been saved as ./files/output/[lang]/lda_[lang].html 
+
 ![Visualisation of Topics for English](files/documentation//lda_en.png)
 
-## **Discussion**
+## **Advantages and Disadvantages of Current Approach**
 
-**1. Benefits of LDA**
+**1. Advantages of LDA**
 
 As we are looking at large chunks of content for each celebrity, LDA can be used for easier interpretation to understand the type of topics each article contains.
 
 **2. Disadvantages of LDA**
-
-Common LDA limitations:
-    1. Fixed K (the number of topics is fixed and must be known ahead of time)
-    2. Uncorrelated topics (Dirichlet topic distribution cannot capture correlations)
-    3. Non-hierarchical (in data-limited regimes hierarchical models allow sharing of data)
-    4. Static (no evolution of topics over time)
-    5. Bag of words (assumes words are exchangeable, sentence structure is not modelled)
-    6. Unsupervised (sometimes weak supervision is desirable, e.g in sentiment analysis)
 
 **Inability to scale**
 LDA has been criticized for not being able to scale due to the linearity of the technique it is based on. Hence, besides LDA, we can try other variants such as pLSI, the probabilistic variant of LSI, which solves this challenge by using a statistical foundation and working with a generative model.
