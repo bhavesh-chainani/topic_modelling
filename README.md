@@ -15,7 +15,7 @@ This README will explain the end-to-end analysis on topic modelling. This projec
 1. README.md - contains information about the project
 2. requirements.txt - requirements file with relevant python packages required
 3. scripts/
-    - wikipedia_scraping.py - contains the script to extract wikipedia articles in different languages and save the dataframe in input folder
+    - wikipedia_scraping.py - contains the script to extract wikipedia articles in different languages and save the dataframe in *files/input* folder
     - topic_modelling.py - contains the script to identify the language, preprocess and group the data using Latent Dirichlet Allocation (LDA)
     - topic_modelling_full_analysis.ipynb - contains full code of project, along with some detailed examples of hyperparameter tuning done
 4. files/
@@ -65,7 +65,7 @@ The code will generate 3 files, which will be stored in the *files/output/**lang
 
 *1. topic_modelling_output_**lang**.xlsx*
 
-This file will showcase the dominant topics for content with regards to that particular actor, as well as relevant topic keywords.
+This file will showcase the dominant topics for content with regards to that particular celebrity, as well as relevant topic keywords.
 
 *2. coherence_score_**lang**.png*
 
@@ -334,14 +334,13 @@ With the hyperparameter tuning done focusing on the number of topics, dirichlet 
 en = [num_topics = 7, alpha = "symmetric", eta = 0.01]
 it = [num_topics = 6, alpha = "asymmetric", eta = 0.91]
 ru = [num_topics = 8, alpha = "asymmetric", eta = 0.01]
-
 ```
 
 The optimal model is then run with the best parameters for that particular language. We set the random_state = 100 to ensure reproducibility of results.
 
 ```python
 ## run model for respective language with best parameters
-lda_model = LdaMulticore(corpus=corpus, id2word=dictionary, iterations=100, num_topics=num_topics, workers = 4, passes=100, alpha=alpha, eta=beta, random_state=100)
+lda_model = LdaMulticore(corpus=corpus, id2word=dictionary, iterations=100, num_topics=num_topics, workers = 4, passes=10, alpha=alpha, eta=beta, random_state=100)
 ```
 
 The full code, along with an end-to-end hyperparameter tuning is available in scripts/topic_modelling_full_analysis.ipynb for the user to tweak the parameters and re-run their own model.
