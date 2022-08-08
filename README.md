@@ -62,15 +62,16 @@ python scripts/topic_modelling.py <lang>
 ```
 
 The code will generate 3 files, which will be stored in the *files/output/**lang*** folders respectively for each language. All of these 3 files have already been stored and saved in *files/output/**lang***
-1. topic_modelling_output_**lang**.xlsx
+
+*1. topic_modelling_output_**lang**.xlsx*
 
 This file will showcase the dominant topics for content with regards to that particular actor, as well as relevant topic keywords.
 
-2. coherence_score_**lang**.png
+*2. coherence_score_**lang**.png*
 
 This file will showcase an example of hyperparameter tuning done, to identify the number of topics to use so as to maximise the coherence score.
 
-3. lda_**lang**.html
+*3. lda_**lang**.html*
 
 This file is an interactive visualisation plot for the user to see how many topics are used for each language and which are the most salient terms for each topic.
 
