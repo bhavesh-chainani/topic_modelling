@@ -111,7 +111,7 @@ I query the content and name of these celebrities in all three languages and app
 This dataframe, containing the content of all 3 different languages, is then saved and stored in the *files/input* folder as *combined_data.xlsx*
 
 
-## **2. Language Detection (scripts/topic_modelling.py)**
+## **2. Language Detection**
 I will be using the package *langdetect* to separate the language and only filter the rows based on my intended language. It is important to set the DetectorFactory seed to ensure reproducibility of results. 
 
 Even though we are aware that these articles are only in these three languages, it is still important to detect the language of the content, should there be any future data of different languages which we wish to add to our dataset.
