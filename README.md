@@ -299,20 +299,71 @@ These tests have been performed on the all three corpora and saved in the "./fil
 
 ### **5. Finding Optimal Number of Topics**
 
-Due to memory constraints, I will only be changing the number of topics for all three languages, and will not change the alpha and beta values, given that the change in coherence score is not that much.
+In this example, I will only be changing the number of topics for all three languages, and will not change the alpha and beta values, given that the change in coherence score is not that much.
 
-The most ideal model will be to use LDAMulticore, which parallelizes and maximises CPU usage to increase runtime. However, assuming the user is running the code on a CPU, I have already run the python script (scripts/topic_modelling.py) for each language to obtain the number of topics to obtain the highest coherence score.
+The most ideal model will be to use LDAMulticore, which parallelizes and maximises CPU usage to increase runtime. However, assuming the user is running the code on a CPU, I have already run the python script (scripts/topic_modelling.py) for each language to obtain the number of topics to obtain the highest coherence score. The ipynb file (scripts/topic_modelling.ipynb) will contain the LDAMultiCore model. The main difference between these two models is the ability to parallelise the CPU workers, increasing the runtime for the model.
 
 ```
-Optimal Number of Topics 
-"en": 7
-"it": 6
-"ru": 5 
+## Optimal Parameters (pre-run)
+topic_lang = {"en": 7, "it": 6, "ru": 5}
+topic_alpha = {"en": "symmetric", "it": "asymmetric", "ru": "asymmetric"}
+topic_beta = {"en": 0.01, "it": 0.91, "ru": 0.91}
+```
+
+The optimal model is then run with the best parameters for that particular language. We set the ranom_state = 100 to ensure reproducibility of results.
+
+```python
+## run model for respective language with best parameters
+lda_model = LdaMulticore(corpus=corpus, id2word=dictionary, iterations=100, num_topics=num_topics, workers = 4, passes=100, alpha=alpha, eta=beta, random_state=100)
 ```
 
 The full code, along with an end-to-end hyperparamter tuning is available in scripts/topic_modelling_full.ipynb for the user to tweak the parameters and re-run their own model.
 
+
 ## **Results**
+
+We can now print out the seven topics (for en corpora) and the related words:
+
+```
+[(0,
+  '0.083*"score" + 0.060*"season" + 0.057*"match" + 0.054*"goal" + 0.048*"player" + 0.035*"league" + 0.017*"test" + 0.017*"finish" + 0.014*"competition" + 0.014*"average"'),
+ (1,
+  '0.038*"clinton" + 0.023*"obama" + 0.018*"law" + 0.017*"party" + 0.017*"election" + 0.013*"political" + 0.012*"presidential" + 0.010*"vote" + 0.009*"secretary" + 0.008*"bill"'),
+ (2,
+  '0.040*"brown" + 0.029*"russian" + 0.029*"russia" + 0.027*"party" + 0.025*"minister" + 0.021*"government" + 0.020*"prime" + 0.017*"election" + 0.014*"code" + 0.013*"howard"'),
+ (3,
+  '0.073*"defeat" + 0.069*"match" + 0.043*"grand" + 0.028*"double" + 0.027*"round" + 0.026*"french" + 0.025*"championship" + 0.025*"cup" + 0.023*"finish" + 0.021*"injury"'),
+ (4,
+  '0.075*"album" + 0.047*"song" + 0.043*"music" + 0.025*"artist" + 0.021*"tour" + 0.020*"awards" + 0.019*"chart" + 0.018*"billboard" + 0.015*"studio" + 0.014*"uk"'),
+ (5,
+  '0.027*"novel" + 0.020*"india" + 0.020*"actor" + 0.019*"king" + 0.014*"rock" + 0.012*"character" + 0.012*"drama" + 0.012*"indian" + 0.010*"publish" + 0.009*"comedy"'),
+ (6,
+  '0.023*"page" + 0.012*"ceo" + 0.008*"computer" + 0.008*"worth" + 0.008*"purchase" + 0.008*"energy" + 0.008*"apple" + 0.007*"net" + 0.007*"system" + 0.007*"found"')]
+```
+
+Let us look at the content of the first celebrity
+
+```
+df['content'][0]
+'George Timothy Clooney (born May 6, 1961) is an American actor and filmmaker. He is the recipient of numerous accolades, including a British Academy Film Award, four Golden Globe Awards, four Screen Actors Guild Awards, and two Academy Awards, one for his acting and the other as a producer...'
+```
+
+According to our LDA model, the above text belongs to Topics 0, 3 and 6. The article is 61% belonging to topic 6 (index 5).
+
+```
+lda_model[corpus][0]
+[(0, 0.18102325), (3, 0.19519578), (6, 0.6111178)]
+```
+
+In LDA models, each document is composed of multiple topics. But, typically only one of the topics is dominant. Hence, I created the python script assigns the most probable topic to each celebrity and appends it to the current dataframe. Showcased below is a snippet of the final dataframe output, which has been saved as an excel file in ./files/output/[lang]/topic_modelling_output_[lang].xlsx
+
+|   |          person |                                           content | actual_lang |                                            tokens | Dominant_Topic | Topic_Perc_Contrib |                                          Keywords |
+|--:|----------------:|--------------------------------------------------:|------------:|--------------------------------------------------:|---------------:|-------------------:|--------------------------------------------------:|
+| 0 |    Bill Clinton | William Jefferson Clinton (né Blythe III; born... |          en | [william, jefferson, clinton, né, blythe, iii,... |              3 |             0.9991 | clinton, party, election, obama, law, politica... |
+| 1 | Hillary Clinton | Hillary Diane Clinton (née Rodham; born Octobe... |          en | [hillary, diane, clinton, née, rodham, bear, o... |              3 |             0.9991 | clinton, party, election, obama, law, politica... |
+| 2 |      Bruno Mars | Peter Gene Hernandez (born October 8, 1985), k... |          en | [peter, gene, hernandez, bear, october, know, ... |              5 |             0.9991 | album, song, music, artist, tour, chart, award... |
+| 3 |      Ed Sheeran |  Edward Christopher Sheeran (; born 17 Februar... |          en | [edward, christopher, sheeran, bear, february,... |              5 |             0.9990 | album, song, music, artist, tour, chart, award... |
+| 4 |      Larry Page | Lawrence Edward Page (born March 26, 1973) is ... |          en | [lawrence, edward, page, bear, march, american... |              1 |             0.9990 | india, page, ceo, test, indian, computer, wort... |
 
 ### **Visualisation**
 
@@ -320,23 +371,21 @@ I use PCA to reduce the dimensionality of the data and visualise the output, usi
 
 As we have shown earlier, we can evaluate the topic clustering results by reviewing all the topics and their associated words case by case. This is totally fine, but may not be very convenient especially when the cluster counts get larger. Luckily, there is a popular visualization package that can be used to visualize the topic clusters in an interactive manner. On a high level, there are mainly two interactive elements in the generated plot you can play with:
 
-The relevance metrics λ. Relevance denotes the degree to which a term appears in a particular topic to the exclusion of others. When λ = 1, the terms are ranked by their probabilities within the topic (the ‘regular’ method) while when λ = 0, the terms are ranked only by their lift. Lift is the ratio of a term’s probability within a topic to its margin probability across the corpus. On a high level, the lift is trying to measure similar effects as TF-IDF vectorization.
+**The relevance metrics λ.**
+Relevance denotes the degree to which a term appears in a particular topic to the exclusion of others. When λ = 1, the terms are ranked by their probabilities within the topic (the ‘regular’ method) while when λ = 0, the terms are ranked only by their lift. Lift is the ratio of a term’s probability within a topic to its margin probability across the corpus. On a high level, the lift is trying to measure similar effects as TF-IDF vectorization.
 
-Inter-topic Distance Map. The user is able to navigate through different topic clusters in the GUI here, and users can have a good overview of how different topic clusters are separated from each other also. Generally speaking, the further away between all the topic clusters, the better the segmentation results are.
+**Inter-topic Distance Map.**
+The user is able to navigate through different topic clusters in the GUI here, and users can have a good overview of how different topic clusters are separated from each other also. Generally speaking, the further away between all the topic clusters, the better the segmentation results are.
 
 ![Visualisation of Topics for English](files/documentation//lda_en.png)
 
-Upon performing hyperparameter tuning and obtaining the highest coherence score for each respective language model, the optimal number of topics are obtained.
+## **Discussion**
 
+**1. Benefits of LDA**
 
-##showcase example fo output of lda model
+As we are looking at large chunks of content for each celebrity, LDA can be used for easier interpretation to understand the type of topics each article contains.
 
-## showcase final dataframe added to output
-
-
-Researchers have developed approaches to obtain an optimal number of topics by using Kullback Leibler Divergence Score. Hence this can be used in place of the score to get a more accurate understanding on the number of topics to use.
-
-LDA also ignores syntactic information and treats documents as bags of words. It also assumes that all words in the document can be assigned a probability of belonging to a topic. That said, the goal of LDA is to determine the mixture of topics that a document contains.
+**2. Disadvantages of LDA**
 
 Common LDA limitations:
     1. Fixed K (the number of topics is fixed and must be known ahead of time)
@@ -346,13 +395,6 @@ Common LDA limitations:
     5. Bag of words (assumes words are exchangeable, sentence structure is not modelled)
     6. Unsupervised (sometimes weak supervision is desirable, e.g in sentiment analysis)
 
-
-## Discussion
-
-**1. Benefits of LDA**
-As we are looking at large chunks of content for each celebrity, LDA can be used for easier interpretation to understand the type of topics each article contains.
-
-**2. Disadvantages of LDA**
 **Inability to scale**
 LDA has been criticized for not being able to scale due to the linearity of the technique it is based on. Hence, besides LDA, we can try other variants such as pLSI, the probabilistic variant of LSI, which solves this challenge by using a statistical foundation and working with a generative model.
 
@@ -363,7 +405,10 @@ With various languages, with hyperparameter tuning, the optimal number of topics
 
 Once trained, most topic models cannot deal with unseen words, this is because they are based on Bag of Words (BoW) representations, which cannot account for missing terms.
 
-## Suggested Improvements
+## **Suggested Improvements**
+
+Researchers have developed approaches to obtain an optimal number of topics by using Kullback Leibler Divergence Score. Hence this can be used in place of the score to get a more accurate understanding on the number of topics to use.
+
 Overcoming that issue using Zero-shot cross-lingual topic modeling with ZeroShotTM, able to retrain the model just using English corpus then test on unseen corpus of different languages using multilingual BERT. This utilises transfer learning, assuming that our main form of interpretation is English and that these documents are the same (which applies in this case).
 
 There is one key assumption for this project as these documents are all the same, but in different languages. Hence it is not ideal if there are documents of different languages and similar contents which we want to group together.
