@@ -1,26 +1,26 @@
 # **Proofpoint AI Engineer - Bhavesh Chainani**
 **Technical Exercise - Proofpoint**
 
-This README will explain the end-to-end analysis on topic modelling. It will explain in detail with regards to topic modelling, primarily focusing on 3 language models, English (en), Russian (ru) and Italian (it).
+This README will explain the end-to-end analysis on topic modelling. This project will primarily focus on 3 language models, English (en), Russian (ru) and Italian (it).
 
 ## **Workflow**
 
 1. Document Extraction
 2. Language Detection
 3. Text Processing
-4. Clustering documents into logical groups (for each language)
+4. Cluster Documents into Logical Groups (for each language)
 5. Results and Discussion
 
 # **File Information**
 1. README.md - contains information about the project
 2. requirements.txt - requirements file with relevant python packages required
 3. scripts/
-    - wikipedia_scraping.py - contains the script to extract wikipedia articles in different languages and save the dataframe in input/ folder
-    - topic_modelling.py - contains the script to identify the language, preprocess and group the data using LDA
+    - wikipedia_scraping.py - contains the script to extract wikipedia articles in different languages and save the dataframe in input folder
+    - topic_modelling.py - contains the script to identify the language, preprocess and group the data using Latent Dirichlet Allocation (LDA)
     - topic_modelling_full_analysis.ipynb - contains full code of project, along with some detailed examples of hyperparameter tuning done
 4. files/
-   - input - contains the input dataframe for running the topic modelling algorithm
-   - output - contains the output dataframe, coherence plot, visualisation file and hypertuning results for each language [en, ru, it]
+   - input - contains the input excel file for running the topic modelling algorithm
+   - output - contains the output excel file, coherence plot, visualisation file and hypertuning results for each language [en, ru, it]
    - documentation - accompanying images to be included in this README.md file
 
 ## **Usage**
@@ -44,7 +44,7 @@ python -m spacy download ru_core_news_md
 
 ### Step 2.
 (Optional) Run the wikipedia scraping file to extract the relevant content of 51 celebrities from wikipedia in 3 different languages,
-English (en), Russian (ru) and Italian (it). This code is optional as the dataframe has already been stored as files/input/combined_data.xlsx. Running the code will overwrite the excel file in the aforementioned directory.
+English (en), Russian (ru) and Italian (it). This code is optional as the dataframe has already been stored as *files/input/combined_data.xlsx*. Running the code will overwrite the excel file in the aforementioned directory.
 
 ```python
 python scripts/wikipedia_scraping.py 
@@ -55,24 +55,28 @@ Run the topic modelling algorithm (LDA) with the specified language of interest 
 
 ```python
 # run python file to do topic modelling for language of interest
-python scripts/topic_modelling.py <lang> (change <lang> parameter to language of interest [en, ru, it])
+python scripts/topic_modelling.py <lang> 
+# (change <lang> parameter to language of interest [en, ru, it])
 # eg. python scripts/topic_modelling.py en
 # eg. python scripts/topic_modelling.py "en" 
 ```
 
-The code will generate 3 files, which will be stored in the ./files/output/[lang] folders respectively for each language. All of these 3 files have already been stored and saved in ./files/output/[lang]
-1. topic_modelling_output_[lang].xlsx
+The code will generate 3 files, which will be stored in the *files/output/**lang*** folders respectively for each language. All of these 3 files have already been stored and saved in *files/output/**lang***
+1. topic_modelling_output_**lang**.xlsx
+
 This file will showcase the dominant topics for content with regards to that particular actor, as well as relevant topic keywords.
 
-2. coherence_score_[lang].png
+2. coherence_score_**lang**.png
+
 This file will showcase an example of hyperparameter tuning done, to identify the number of topics to use so as to maximise the coherence score.
 
-3. lda_[lang].html
+3. lda_**lang**.html
+
 This file is an interactive visualisation plot for the user to see how many topics are used for each language and which are the most salient terms for each topic.
 
-# **Explanation of Code (Automatic Document Clustering)**
+## **Explanation of Code (Automatic Document Clustering)**
 
-### **1. Document Extraction (scripts/wikipedia_scraping.py)**
+## **1. Document Extraction (scripts/wikipedia_scraping.py)**
 
 I used Wikipedia to source the content of 51 random celebrities. Such data can be scraped using packages such as *BeautifulSoup4*. However, wikipedia has a python package, *wikipedia*, which allows us to set the language of interest and query content of those articles in that particular langauge.
 
@@ -103,11 +107,13 @@ I query the content and name of these celebrities in all three languages and app
 | Shah Rukh Khan    | Shah Rukh Khan (pronounced [ˈʃɑːɦɾʊx xɑːn]; bo... |
 | Leonardo DiCaprio | Leonardo Wilhelm DiCaprio (; Italian: [diˈkaːp... |
 
-This dataframe, containing the content of all 3 different languages, is then saved and stored in the files/input folder as combined_data.xlsx
+This dataframe, containing the content of all 3 different languages, is then saved and stored in the *files/input* folder as *combined_data.xlsx*
 
 
-### **2. Language Detection (scripts/topic_modelling.py)**
-I will be using the package *langdetect* to separate the language and only filter the rows based on my intended language. It is important to set the DetectorFactory seed to ensure reproducibility of results. As we are aware that these articles are only in these three languages, it is still important to detect the language of the content, should there be any future data of different languages which we wish to add to our dataset.
+## **2. Language Detection (scripts/topic_modelling.py)**
+I will be using the package *langdetect* to separate the language and only filter the rows based on my intended language. It is important to set the DetectorFactory seed to ensure reproducibility of results. 
+
+Even though we are aware that these articles are only in these three languages, it is still important to detect the language of the content, should there be any future data of different languages which we wish to add to our dataset.
 
 ```python
 from langdetect import detect, DetectorFactory, detect_langs
@@ -126,11 +132,13 @@ Written below is a sample of 5 rows after the language detection has been done a
 | 3 |         Shakira | Shakira Isabel Mebarak Ripoll ( shə-KEER-ə, Sp... |          en |
 | 4 |      Larry_Page | Lawrence Page, detto Larry (East Lansing, 26 m... |          it |
 
-### **3. Text Processing**
+## **3. Text Processing**
 
 In the field of NLP, text preprocessing is the process of cleaning and preparing the data. I will be using the open-source software library called *spaCy* to prepare the data for analysis, but other libraries such as *NLTK* can be used.
 
-I will be using 3 of spacy's pre-trained models for each language. The model, which I will call 'nlp', can be thought of as a pipeline. When you call 'nlp' on a text or word, the text runs through a processing pipeline, which is depicted below. It means that if the text is not tokenized, it will then be tokenized, and afterwards, different components (tagger, parser, ner etc.) will be activated. To tokenize text means turning a string or document into smaller chunks (tokens). 
+I will be using 3 of spacy's pre-trained models for each language. The model, which I will call 'nlp', can be thought of as a pipeline. When we call 'nlp' on a text or word, the text runs through a processing pipeline, which is depicted in the image below.
+
+It means that if the text is not tokenized, it will then be tokenized, and afterwards, different components (tagger, parser, ner etc.) will be activated. To tokenize text means turning a string or document into smaller chunks (tokens). 
 
 As we are doing topic analysis on 3 separate languages, I will run the relevant *spaCy* medium models for the three languages, English (en), Italian (it) and Russian (ru).
 
@@ -146,7 +154,7 @@ lang_models = {"en": spacy.load("en_core_web_md"), "it": spacy.load("it_core_new
 df = df_comb[df_comb["actual_lang"] == lang].reset_index(drop=True)
 ```
 
-I will focus on the 'content' column, where I will tokenize, lemmatize and remove stopwords (*is_stop*) for each language of interest, while keeping alphabetic characters (*is_alpha*)
+I will focus on the **'content'** column, where I will tokenize, lemmatize and remove stopwords (*is_stop*) for each language of interest, while keeping alphabetic characters (*is_alpha*).
 
 
 ```python
@@ -158,7 +166,7 @@ for summary in nlp.pipe(df["content"]):
     tokens.append(proj_tok)
 ```
 
-Showcased below is the updated dataframe snippet with the tokens appended to the corresponding information
+Showcased below is the updated dataframe snippet with the tokens appended to the corresponding rows.
 
 |   |            person |                                           content | actual_lang |                                            tokens |
 |--:|------------------:|--------------------------------------------------:|------------:|--------------------------------------------------:|
@@ -176,17 +184,17 @@ The two main inputs to the topic model which I will be using Latent Dirichlet al
 
 *Corpus*: Having assigned a unique ID to each token, the corpus simply contains each ID and its frequency. LDA is a "bag-of-words" model, which means that the order of words does not matter.
 
-I will apply the Dictionary Object from Gensim, which maps each word to their unique ID, and will filter out low-frequency and high-frequency tokens, limiting the vocabulary to a max of 1000 words.
+I will apply the Dictionary Object from *Gensim*, which maps each word to their unique ID, and will filter out low-frequency and high-frequency tokens, limiting the vocabulary to a max of 1000 words.
 
 ```python
 dictionary.filter_extremes(no_below=5, no_above=0.5, keep_n=1000) #keep 1000 most unique tokens
 ```
 
-Showcased below is part of the filtered dictionary for the english content.
+Showcased below is part of the filtered dictionary for the English content.
 
 **{'abuse': 0, 'accept': 1, 'acclaim': 2, 'accolade': 3, 'account': 4, 'accuse': 5, ... }**
 
-I will construct the corpus using the above filtered dictionary and the doc2bow function. The function doc2bow() simply counts the number of occurrences of each distinct word, converts the word to its integer word id and returns the result as a sparse vector. In order words, this function converts a collection of words to its bag-of-words representation: a list of (token_id, token_count) 2 tuples.
+I will construct the corpus using the above filtered dictionary and the *doc2bow* function. The function *doc2bow()* simply counts the number of occurrences of each distinct word, converts the word to its integer word id and returns the result as a sparse vector. In order words, this function converts a collection of words to its bag-of-words representation: a list of (token_id, token_count) 2 tuples.
 
 ```python
 corpus = [dictionary.doc2bow(doc) for doc in df['tokens']]
@@ -198,19 +206,22 @@ print(corpus[:1])
 Gensim creates a unique id for each word in the document. The produced corpus shown above is a mapping of (word_id, word_frequency). For example, (0, 1) above implies, word id 0 occurs once in the first document. Likewise, word id 2 occurs four times and so on.
 
 
-### **4. Cluster Documents into Logical Groups**
+## **4. Cluster Documents into Logical Groups**
 
 The next step is to train the unsupervised machine learning model on the data. There are many models which can be used for clustering of such documents, such as Latent Semantic Analysis (LSA), and Latent Dirichlet Allocation (LDA). As mentioned above, in this case I choose to work with LDA. The purpose of LDA is mapping each document in our corpus to a set of topics which cover a good deal of words in that document. 
 
-I choose to work with the LdaMulticore, which uses all CPU cores to parallelize and speed up model training. 
+In particular, I choose to work with the LdaMulticore, which uses all CPU cores to parallelize and speed up model training. 
 
 When inserting our corpus into the topic modelling algorithm, the corpus gets analyzed in order to find the distribution of words in each topic and the distribution of topics in each document.
 
 I first pass a baseline model, setting the number of topics to 10. As input, I give the model our corpus and dictionary from before. I choose to iterate over the corpus 100 times to optimize the model parameters. The pass is 10, which means the model will pass through the corpus ten times during training.
 
 *chunk_size* is the number of documents to be used in each training chunk
+
 *passes* is the total number of training passes
+
 *per_word_topics* allows the model to compute a list of topics, sorted in descending order of most likely topics of each word
+
 *random_state* allows us to ensure reproducibility
 
 ```python
@@ -288,7 +299,7 @@ For the English language text in our corpus, the optimal number of topics to max
 
 ![Coherence Score for English Model](files/documentation//coherence_score_en.png)
 
-#### **Further Hyperparameter Tuning**
+### **Further Hyperparameter Tuning**
 
 Our initial hyperparameter tuning only focused on the number of topics (K). We can further perform a series of sensitivity tests to help determine the following model hyperparameters:
 
@@ -298,7 +309,8 @@ Our initial hyperparameter tuning only focused on the number of topics (K). We c
 
 These tests will be performed in sequence, one parameter at a time by keeping others constant and run them over the two different validation corpus sets. We’ll use C_v as our choice of metric for performance comparison, which is the coherence score as mentioned above.
 
-These tests have been performed on the all three corpora and saved as "./files/output/[lang]/lda_tuning_results.csv" . Showcased is a snippet of how the coherence score changes with the alpha and beta values for the English corpora (for 7 topics).
+These tests have been performed on the all three corpora and saved as *files/output/**lang**/lda_tuning_results.csv* . Showcased is a snippet of how the coherence score changes with the alpha and beta values for the English corpora (for 7 topics).
+
 
 | Validation_Set | Topics | Alpha | Beta      | Coherence  |
 |----------------|--------|-------|-----------|------------|
@@ -306,7 +318,8 @@ These tests have been performed on the all three corpora and saved as "./files/o
 | 100% Corpus    | 7      | 0.01  | symmetric | 0.62035295 |
 | 100% Corpus    | 7      | 0.31  | 0.01      | 0.70014313 |
 
-### **5. Finding Optimal Number of Topics**
+
+### **Finding Optimal Number of Topics**
 
 The most ideal model will be to use LDAMulticore, which parallelizes and maximises CPU usage to increase runtime. However, assuming the user is running the code on a CPU, I have also used LDAModel in the python script (scripts/topic_modelling.py). 
 
@@ -333,7 +346,7 @@ lda_model = LdaMulticore(corpus=corpus, id2word=dictionary, iterations=100, num_
 The full code, along with an end-to-end hyperparameter tuning is available in scripts/topic_modelling_full_analysis.ipynb for the user to tweak the parameters and re-run their own model.
 
 
-## **Results**
+## **5.Results**
 
 We can now print out the 7 topics (for en corpora) and the related words:
 
@@ -354,21 +367,21 @@ We can now print out the 7 topics (for en corpora) and the related words:
   '0.023*"page" + 0.012*"ceo" + 0.008*"computer" + 0.008*"worth" + 0.008*"purchase" + 0.008*"energy" + 0.008*"apple" + 0.007*"net" + 0.007*"system" + 0.007*"found"')]
 ```
 
-Let us look at the content of the first celebrity
+Let us look at the content of the first celebrity.
 
 ```
 df['content'][0]
 'George Timothy Clooney (born May 6, 1961) is an American actor and filmmaker. He is the recipient of numerous accolades, including a British Academy Film Award, four Golden Globe Awards, four Screen Actors Guild Awards, and two Academy Awards, one for his acting and the other as a producer...'
 ```
 
-According to our LDA model, the above text belongs to Topics 0, 3 and 6. The article is 61% belonging to topic 6 (index 5).
+According to our LDA model output as shown below, the text belongs to Topics 0, 3 and 6. The article is 61% belonging to topic 6 (index 5).
 
 ```
 lda_model[corpus][0]
 [(0, 0.18102325), (3, 0.19519578), (6, 0.6111178)]
 ```
 
-In LDA models, each document is composed of multiple topics. But, typically only one of the topics is dominant. Hence, the pytho script (scripts/topic_modelling.py) assigns the most probable topic to each celebrity and appends it to the current dataframe. Showcased below is a snippet of the final dataframe output, which has been saved as an excel file as ./files/output/[lang]/topic_modelling_output_[lang].xlsx
+In LDA models, each document is composed of multiple topics. But, typically only one of the topics is dominant. Hence, I have assigned the most probable topic to each celebrity and appended it to the current dataframe. Showcased below is a snippet of the final dataframe output, which has been saved as an excel file as *files/output/**lang**/topic_modelling_output_**lang**.xlsx*
 
 |   |          person |                                           content | actual_lang |                                            tokens | Dominant_Topic | Topic_Perc_Contrib |                                          Keywords |
 |--:|----------------:|--------------------------------------------------:|------------:|--------------------------------------------------:|---------------:|-------------------:|--------------------------------------------------:|
@@ -383,12 +396,14 @@ In LDA models, each document is composed of multiple topics. But, typically only
 I use PCA to reduce the dimensionality of the data and visualise the output, using pyLDAvis. pyLDAvis is used to visualize the topic clusters in an interactive manner. On a high level, there are mainly two interactive elements in the generated plot we can change:
 
 **The relevance metrics λ.**
+
 Relevance denotes the degree to which a term appears in a particular topic to the exclusion of others. When λ = 1, the terms are ranked by their probabilities within the topic (the 'regular' method) while when λ = 0, the terms are ranked only by their lift. Lift is the ratio of a term’s probability within a topic to its margin probability across the corpus. On a high level, the lift is trying to measure similar effects as TF-IDF vectorization.
 
 **Inter-topic Distance Map.**
+
 The user is able to navigate through different topic clusters in the GUI here, and users can have a good overview of how different topic clusters are separated from each other also. Generally speaking, the further away between all the topic clusters, the better the segmentation results are.
 
-These interactive plots have been saved as ./files/output/[lang]/lda_[lang].html 
+These interactive plots have been saved as */files/output/**lang**/lda_**lang**.html*
 
 ![Visualisation of Topics for English](files/documentation//lda_en.png)
 
@@ -409,6 +424,7 @@ With the current approach focusing on LDA for each language, it is not optimal w
 Once trained, most topic models cannot deal with unseen words, this is because they are based on Bag of Words (BoW) representations, which cannot account for missing terms.
 
 **Inability to Scale**
+
 LDA has been criticized for not being able to scale due to the linearity of the technique it is based on. Hence, besides LDA, we can try other variants such as pLSI, the probabilistic variant of LSI, which solves this challenge by using a statistical foundation and working with a generative model.
 
 **Unsupervised Learnin Limitations**
@@ -417,8 +433,8 @@ Since LDA is an unsupervised learning method, it primarily focuses on inferring 
 
 Even if we were to apply a supervised machine learning algorithm, currently available topic models suffer from two limitations: 
 
-    (i) they cannot handle unknown words by default
-    (ii) they cannot easily be applied to other languages - except the one in the training data- since the vocabulary would not match. 
+    1. they cannot handle unknown words by default
+    2. they cannot easily be applied to other languages - except the one in the training data- since the vocabulary would not match. 
     
 Training on several languages together, though, results in a vocabulary so vast that it creates problems with parameter size, search, and overfitting.
 
