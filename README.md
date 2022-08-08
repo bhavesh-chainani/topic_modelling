@@ -347,7 +347,7 @@ lda_model = LdaMulticore(corpus=corpus, id2word=dictionary, iterations=100, num_
 The full code, along with an end-to-end hyperparameter tuning is available in scripts/topic_modelling_full_analysis.ipynb for the user to tweak the parameters and re-run their own model.
 
 
-## **5.Results**
+## **5. Results**
 
 We can now print out the 7 topics (for en corpora) and the related words:
 
@@ -428,14 +428,14 @@ Once trained, most topic models cannot deal with unseen words, this is because t
 
 LDA has been criticized for not being able to scale due to the linearity of the technique it is based on. Hence, besides LDA, we can try other variants such as pLSI, the probabilistic variant of LSI, which solves this challenge by using a statistical foundation and working with a generative model.
 
-**Unsupervised Learnin Limitations**
+**Unsupervised Learning Limitations**
 
 Since LDA is an unsupervised learning method, it primarily focuses on inferring topics that maximise the likelihood of the collection. 
 
 Even if we were to apply a supervised machine learning algorithm, currently available topic models suffer from two limitations: 
 
     1. they cannot handle unknown words by default
-    2. they cannot easily be applied to other languages - except the one in the training data- since the vocabulary would not match. 
+    2. they cannot easily be applied to other languages - except the one in the training data- since the vocabulary would not match 
     
 Training on several languages together, though, results in a vocabulary so vast that it creates problems with parameter size, search, and overfitting.
 
@@ -447,6 +447,6 @@ We can also apply Multilingual Dynamic Topic Modelling (MLTM) (https://github.co
 
 
 ## **Contributers**
-#### Bhavesh Chainani
-#### Data Scientist
-#### August 2022
+### Bhavesh Chainani
+### Data Scientist
+### August 2022
