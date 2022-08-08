@@ -18,7 +18,7 @@ import sys
 
 try:
     lang = sys.argv[1]
-    print("Running topic modelling in " + str(lang) + " language"
+    print("Running topic modelling in " + str(lang) + " language")
 except:
     print("Please input a language parameter [en, ru, it] in order to run the script")
     exit()
@@ -58,7 +58,6 @@ dictionary.filter_extremes(no_below=5, no_above=0.5, keep_n=1000)
 
 corpus = [dictionary.doc2bow(doc) for doc in df['tokens']]
 
-
 ## Code to plot coherence plot for each topic number (present in topic_modelling_full.ipynb file as well)
           
 # topics = []
@@ -71,9 +70,10 @@ corpus = [dictionary.doc2bow(doc) for doc in df['tokens']]
 #     score.append(cm.get_coherence())
 # num_topics = topics[score.index(max(score))]
 
-topic_lang = {"en": 7, "it": 6, "ru": 5}
-topic_alpha = {"en": "symmetric", "it": "asymmetric", "ru": "symmetric"}
-topic_beta = {"en": 0.01, "it": 0.91, "ru": "symmetric"}
+## best parameters for each language model (pre-run)
+topic_lang = {"en": 7, "it": 6, "ru": 8}
+topic_alpha = {"en": "symmetric", "it": "asymmetric", "ru": "asymmetric"}
+topic_beta = {"en": 0.01, "it": 0.91, "ru": 0.01}
 
 num_topics = topic_lang[lang]
 print("Number of topics with highest coherence score for " + str(lang) + " model is: " + str(num_topics))

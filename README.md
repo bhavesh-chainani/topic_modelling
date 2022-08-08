@@ -1,7 +1,9 @@
 # **Proofpoint AI Engineer - Bhavesh Chainani**
-Technical Exercise - Proofpoint
+**Technical Exercise - Proofpoint**
 
-This README will explain the end-to-end analysis on topic modelling. It will explain in detail with regards to 5 main aspects, primarily focusing on 3 language models, English (en), Russian (ru) and Italian (it).
+This README will explain the end-to-end analysis on topic modelling. It will explain in detail with regards to topic modelling, primarily focusing on 3 language models, English (en), Russian (ru) and Italian (it).
+
+## **Workflow**
 
 1. Document Extraction
 2. Language Detection
@@ -11,22 +13,28 @@ This README will explain the end-to-end analysis on topic modelling. It will exp
 
 # **File Information**
 1. README.md - contains information about the project
-2. topic_modelling.py - code in py format
-3. requirements.txt - requirements file with relevant python packages required
-4. scripts
-    - /wikipedia_scraping.py - contains the script to extract wikipedia articles in different languages and save the dataframe in input/ folder
-    - /topic_modelling.py - contains the script to identify the language, preprocess and group the data using LDA
-    - /topic_modelling_full_analysis.ipynb - contains some examples of hyperparameter tuning done
-5. files
-   - /input - contains the input dataframe for running the topic modelling algorithm
-   - /output - contains the output dataframe, coherence plot and visualisation file for each language [en, ru, it]
-   - /documentation - accompanying images to be included in this README.md file
-
+2. requirements.txt - requirements file with relevant python packages required
+3. scripts/
+    - wikipedia_scraping.py - contains the script to extract wikipedia articles in different languages and save the dataframe in input/ folder
+    - topic_modelling.py - contains the script to identify the language, preprocess and group the data using LDA
+    - topic_modelling_full_analysis.ipynb - contains full code of project, along with some detailed examples of hyperparameter tuning done
+4. files/
+   - input - contains the input dataframe for running the topic modelling algorithm
+   - output - contains the output dataframe, coherence plot, visualisation file and hypertuning results for each language [en, ru, it]
+   - documentation - accompanying images to be included in this README.md file
 
 ## **Usage**
 
 ### Step 1:
-Create a virtual environment, and run requirements.txt in that venv to install the relevant packages.
+Create and activate a virtual environment in your desired directory. 
+```python
+python -m venv proofpoint_environment
+# can use python3 -m venv proofpoint_environment as well
+source proofpoint_environment/bin/activate
+```
+
+Run the commands below to install relevant python packages in requirements.txt, as well as the relevant spacy language models.
+
 ```python
 pip install -r requirements.txt
 python -m spacy download en_core_web_md 
@@ -35,14 +43,15 @@ python -m spacy download ru_core_news_md
 ```
 
 ### Step 2.
-(Optional) Run the web scraping file to extract the relevant content of 51 celebrities from wikipedia in 3 different languages,
+(Optional) Run the wikipedia scraping file to extract the relevant content of 51 celebrities from wikipedia in 3 different languages,
 English (en), Russian (ru) and Italian (it). This code is optional as the dataframe has already been stored as files/input/combined_data.xlsx. Running the code will overwrite the excel file in the aforementioned directory.
+
 ```python
 python scripts/wikipedia_scraping.py 
 ```
 
 ### Step 3.
-Run the topic modelling algorithm (LDA) with the specified language of interest as a parameter. For this project, we will be solely focusing on the 3 different languages as specified (en, ru, it). 
+Run the topic modelling algorithm (LDA) with the specified language of interest as a parameter. For this project, we will be solely focusing on the 3 different languages as specified, English (en), Russian (ru) and Italian (it). 
 
 ```python
 # run python file to do topic modelling for language of interest
@@ -51,7 +60,7 @@ python scripts/topic_modelling.py <lang> (change <lang> parameter to language of
 # eg. python scripts/topic_modelling.py "en" 
 ```
 
-The code will generate 3 files, which will be stored in the output/[lang] folders respectively for each language. 
+The code will generate 3 files, which will be stored in the ./files/output/[lang] folders respectively for each language. All of these 3 files have already been stored and saved in ./files/output/[lang]
 1. topic_modelling_output_[lang].xlsx
 This file will showcase the dominant topics for content with regards to that particular actor, as well as relevant topic keywords.
 
@@ -157,14 +166,15 @@ Showcased below is the updated dataframe snippet with the tokens appended to the
 | 1 |    Shah Rukh Khan | Shah Rukh Khan (pronounced [ˈʃɑːɦɾʊx xɑːn]; bo... |          en | [shah, rukh, khan, pronounce, ˈʃɑːɦɾʊx, xɑːn, ... |
 | 2 | Leonardo DiCaprio | Leonardo Wilhelm DiCaprio (; Italian: [diˈkaːp... |          en | [leonardo, wilhelm, dicaprio, italian, diˈkaːp... |
 
-As we can see, some of these tokens have different languages, even though the dataframe has already been filtered to focus on english-detected texts. Some of these texts in different languages may be important, especially if they have a high frequency and are not stop words. Hence, I will leave such words in, which may then be filtered out when we create our dictionary.
+As we can see, some of these tokens have words such as ˈʃɑːɦɾʊx', even though the dataframe has already been filtered to focus on english-detected texts. Some of these texts in different languages may be important, especially if they have a high frequency and are not stop words. Hence, I will leave such words in first, and will apply further preprocessing later on to filter such low frequency texts.
 
 ### Create Dictionary and Corpus
 
-The two main inputs to the topic model which I will be using (LDA) are the dictionary and the corpus:
+The two main inputs to the topic model which I will be using Latent Dirichlet allocation (LDA), are the dictionary and the corpus:
 
-Dictionary: The idea of the dictionary is to give each token a unique ID.
-Corpus: Having assigned a unique ID to each token, the corpus simply contains each ID and its frequency. LDA is a "bag-of-words" model, which means that the order of words does not matter.
+*Dictionary*: The idea of the dictionary is to give each token a unique ID.
+
+*Corpus*: Having assigned a unique ID to each token, the corpus simply contains each ID and its frequency. LDA is a "bag-of-words" model, which means that the order of words does not matter.
 
 I will apply the Dictionary Object from Gensim, which maps each word to their unique ID, and will filter out low-frequency and high-frequency tokens, limiting the vocabulary to a max of 1000 words.
 
@@ -172,7 +182,7 @@ I will apply the Dictionary Object from Gensim, which maps each word to their un
 dictionary.filter_extremes(no_below=5, no_above=0.5, keep_n=1000) #keep 1000 most unique tokens
 ```
 
-Showcased below is part of the filtered dictionary.
+Showcased below is part of the filtered dictionary for the english content.
 
 **{'abuse': 0, 'accept': 1, 'acclaim': 2, 'accolade': 3, 'account': 4, 'accuse': 5, ... }**
 
@@ -187,6 +197,7 @@ print(corpus[:1])
 
 Gensim creates a unique id for each word in the document. The produced corpus shown above is a mapping of (word_id, word_frequency). For example, (0, 1) above implies, word id 0 occurs once in the first document. Likewise, word id 2 occurs four times and so on.
 
+
 ### **4. Cluster Documents into Logical Groups**
 
 The next step is to train the unsupervised machine learning model on the data. There are many models which can be used for clustering of such documents, such as Latent Semantic Analysis (LSA), and Latent Dirichlet Allocation (LDA). As mentioned above, in this case I choose to work with LDA. The purpose of LDA is mapping each document in our corpus to a set of topics which cover a good deal of words in that document. 
@@ -195,13 +206,12 @@ I choose to work with the LdaMulticore, which uses all CPU cores to parallelize 
 
 When inserting our corpus into the topic modelling algorithm, the corpus gets analyzed in order to find the distribution of words in each topic and the distribution of topics in each document.
 
-As input, I give the model our corpus and dictionary from before; besides, I choose to iterate over the corpus 100 times to optimize the model parameters. The pass is 10, which means the model will pass through the corpus ten times during training.
-
-I first pass a baseline model, setting the number of topics to 10.
+I first pass a baseline model, setting the number of topics to 10. As input, I give the model our corpus and dictionary from before. I choose to iterate over the corpus 100 times to optimize the model parameters. The pass is 10, which means the model will pass through the corpus ten times during training.
 
 *chunk_size* is the number of documents to be used in each training chunk
 *passes* is the total number of training passes
 *per_word_topics* allows the model to compute a list of topics, sorted in descending order of most likely topics of each word
+*random_state* allows us to ensure reproducibility
 
 ```python
 lda_model = LdaMulticore(corpus=corpus,
@@ -214,7 +224,7 @@ lda_model = LdaMulticore(corpus=corpus,
                        per_word_topics=True)
 ```
 
-We can print the keywords in th 10 topics for this baseline model
+We can print the keywords in th 10 topics for this baseline model.
 
 ```
 [(0,
@@ -280,15 +290,15 @@ For the English language text in our corpus, the optimal number of topics to max
 
 #### **Further Hyperparameter Tuning**
 
-Now that we have the baseline coherence score for the default LDA model, we can perform a series of sensitivity tests to help determine the following model hyperparameters:
+Our initial hyperparameter tuning only focused on the number of topics (K). We can further perform a series of sensitivity tests to help determine the following model hyperparameters:
 
-Number of Topics (K)
-Dirichlet hyperparameter alpha: Document-Topic Density
-Dirichlet hyperparameter beta: Word-Topic Density
+1. Number of Topics (K)
+2. Dirichlet hyperparameter alpha: Document-Topic Density
+3. Dirichlet hyperparameter beta: Word-Topic Density
 
-These tests will be performed in sequence, one parameter at a time by keeping others constant and run them over the two different validation corpus sets. We’ll use C_v as our choice of metric for performance comparison.
+These tests will be performed in sequence, one parameter at a time by keeping others constant and run them over the two different validation corpus sets. We’ll use C_v as our choice of metric for performance comparison, which is the coherence score as mentioned above.
 
-These tests have been performed on the all three corpora and saved in the "./files/output/[lang]" folder. Showcased is a snippet of how the coherence score changes with the alpha and beta values for the English corpora (given a fixed topic number).
+These tests have been performed on the all three corpora and saved as "./files/output/[lang]/lda_tuning_results.csv" . Showcased is a snippet of how the coherence score changes with the alpha and beta values for the English corpora (for 7 topics).
 
 | Validation_Set | Topics | Alpha | Beta      | Coherence  |
 |----------------|--------|-------|-----------|------------|
@@ -298,25 +308,29 @@ These tests have been performed on the all three corpora and saved in the "./fil
 
 ### **5. Finding Optimal Number of Topics**
 
-In this example, I will only be changing the number of topics for all three languages, and will not change the alpha and beta values, given that the change in coherence score is not that much.
+The most ideal model will be to use LDAMulticore, which parallelizes and maximises CPU usage to increase runtime. However, assuming the user is running the code on a CPU, I have also used LDAModel in the python script (scripts/topic_modelling.py). 
 
-The most ideal model will be to use LDAMulticore, which parallelizes and maximises CPU usage to increase runtime. However, assuming the user is running the code on a CPU, I have already run the python script (scripts/topic_modelling.py) for each language to obtain the number of topics to obtain the highest coherence score. The ipynb file (scripts/topic_modelling_full_analysis.ipynb) will contain the LDAMultiCore model. The main difference between these two models is the ability to parallelise the CPU workers, increasing the runtime for the model.
+The main difference between these two models (LDAModel and LDAMulticore) is the ability to parallelise the CPU workers, which affects the runtime of the model.
+
+With the hyperparameter tuning done focusing on the number of topics, dirichlet hyperparameter alpha and dirichlet hyperparameter beta parameters, the optimal parameters have been obtained for the three language models and showcased below.
 
 ```
-## Optimal Parameters (pre-run)
-topic_lang = {"en": 7, "it": 6, "ru": 5}
-topic_alpha = {"en": "symmetric", "it": "asymmetric", "ru": "asymmetric"}
-topic_beta = {"en": 0.01, "it": 0.91, "ru": 0.91}
+## Optimal Parameters
+
+en = [num_topics = 7, alpha = "symmetric", eta = 0.01]
+it = [num_topics = 6, alpha = "asymmetric", eta = 0.91]
+ru = [num_topics = 8, alpha = "asymmetric", eta = 0.01]
+
 ```
 
-The optimal model is then run with the best parameters for that particular language. We set the ranom_state = 100 to ensure reproducibility of results.
+The optimal model is then run with the best parameters for that particular language. We set the random_state = 100 to ensure reproducibility of results.
 
 ```python
 ## run model for respective language with best parameters
 lda_model = LdaMulticore(corpus=corpus, id2word=dictionary, iterations=100, num_topics=num_topics, workers = 4, passes=100, alpha=alpha, eta=beta, random_state=100)
 ```
 
-The full code, along with an end-to-end hyperparamter tuning is available in scripts/topic_modelling_full_analysis.ipynb for the user to tweak the parameters and re-run their own model.
+The full code, along with an end-to-end hyperparameter tuning is available in scripts/topic_modelling_full_analysis.ipynb for the user to tweak the parameters and re-run their own model.
 
 
 ## **Results**

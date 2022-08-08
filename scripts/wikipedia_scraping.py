@@ -1,3 +1,4 @@
+#import relevant packages
 import wikipedia
 import pandas as pd
 
@@ -59,5 +60,6 @@ print("Italian dataframe has been created")
 ## combining data into data_comb
 df_comb = pd.concat([df_eng, df_it, df_ru], axis=0).reset_index(drop=True)
 
+## saving combined dataframe in ./files/input folder
 df_comb.to_excel("./files/input/combined_data.xlsx",index=False)
 print("Combined dataframe has been saved in ./files/input folder.")
