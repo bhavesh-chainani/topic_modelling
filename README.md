@@ -400,28 +400,33 @@ As we are looking at large chunks of content for each celebrity, LDA can be used
 
 **2. Disadvantages of LDA**
 
-**Inability to scale**
-LDA has been criticized for not being able to scale due to the linearity of the technique it is based on. Hence, besides LDA, we can try other variants such as pLSI, the probabilistic variant of LSI, which solves this challenge by using a statistical foundation and working with a generative model.
-
-**Self interpretation of topics**
+**Self Interpretation of Topics**
 
 Using LDA for topic modelling results in the user's interpretability of what each topic group should be labelled as.
 
-With various languages, with hyperparameter tuning, the optimal number of topics are different, hence it is difficult to identify the number of topics to apply LDA model on across these three different langauges.
+With the current approach focusing on LDA for each language, it is not optimal with regards to multi-language modelling, where we are want to align topics across languages to group documents of different languages into 1 set of topics.
 
 Once trained, most topic models cannot deal with unseen words, this is because they are based on Bag of Words (BoW) representations, which cannot account for missing terms.
 
-**Unsupervised Learning**
+**Inability to Scale**
+LDA has been criticized for not being able to scale due to the linearity of the technique it is based on. Hence, besides LDA, we can try other variants such as pLSI, the probabilistic variant of LSI, which solves this challenge by using a statistical foundation and working with a generative model.
 
-Since LDA is an unsupervised learning method, it primarily focuses on inferring topics that maximise the likelihood of the collection. Even if we were to apply a supervised machine learning algorithm, currently available topic models suffer from two limitations: (i) they cannot handle unknown words by default, and (ii) they cannot easily be applied to other languages- except the one in the training data- since the vocabulary would not match. Training on several languages together, though, results in a vocabulary so vast that it creates problems with parameter size, search, and overfitting.
+**Unsupervised Learnin Limitations**
+
+Since LDA is an unsupervised learning method, it primarily focuses on inferring topics that maximise the likelihood of the collection. 
+
+Even if we were to apply a supervised machine learning algorithm, currently available topic models suffer from two limitations: 
+
+    (i) they cannot handle unknown words by default
+    (ii) they cannot easily be applied to other languages - except the one in the training data- since the vocabulary would not match. 
+    
+Training on several languages together, though, results in a vocabulary so vast that it creates problems with parameter size, search, and overfitting.
 
 ## **Suggested Improvements**
 
-With a cross-lingual zero-shot topic model (ZeroShotTM) (https://aclanthology.org/2021.eacl-main.143.pdf), we can first learn topics on English and then predict topics for documents in that other language(as long as we use pre-trained representations that account for both English and the other language). This allows us to retrain the model just using English corpus then test on unseen corpus of different languages using multilingual BERT. This utilises transfer learning, assuming that our main form of interpretation is English and that these documents are in the same domain (which applies in this case).
+With a cross-lingual zero-shot topic model (ZeroShotTM) (https://aclanthology.org/2021.eacl-main.143.pdf), we can first learn topics on English and then predict topics for documents in that other language (as long as we use pre-trained representations that account for both English and the other language). This allows us to retrain the model just using English corpus then test on unseen corpus of different languages using multilingual BERT. This utilises transfer learning, assuming that our main form of interpretation is English and that these documents are in the same domain (which applies in this case).
 
-We can also apply Multilingual Dynamic Topic Modelling (MLTM) (https://github.com/ezosa/multilingual_dtm).
-
-The main advantage of MLTM over this approach is that MLTM aligns topics across languages while LDA cannot guarantee this. This is important because one of the benefits of MLTM is that it can be used for cross-lingual document retrieval. For instance, a user might find a German news article of interest and wants to find similar articles in French or Finnish. Without any knowledge of these languages we can retrieve such articles quickly using MLTM.
+We can also apply Multilingual Dynamic Topic Modelling (MLTM) (https://github.com/ezosa/multilingual_dtm). The main advantage of MLTM over our current approach is that MLTM aligns topics across languages while LDA cannot guarantee this. This is important because one of the benefits of MLTM is that it can be used for cross-lingual document retrieval. For instance, a user might find a German news article of interest and wants to find similar articles in French or Finnish. Without any knowledge of these languages we can retrieve such articles quickly using MLTM.
 
 
 ## **Contributers**
