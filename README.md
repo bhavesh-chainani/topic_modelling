@@ -1,5 +1,5 @@
-# **Proofpoint AI Engineer - Bhavesh Chainani**
-**Technical Exercise - Proofpoint**
+# **Topic Modelling Analysis - Bhavesh Chainani**
+**Natural Language Processing**
 
 This README will explain the end-to-end analysis on topic modelling. This project will primarily focus on 3 language models, English (en), Russian (ru) and Italian (it).
 
